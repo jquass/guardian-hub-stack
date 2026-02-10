@@ -1,0 +1,35 @@
+---
+# Guardian Hub Services
+
+- Network:
+    - Pi-hole:
+        icon: pi-hole.png
+        href: http://pihole.guardian.home/admin
+        description: Network-wide ad blocking via your own Linux hardware
+
+    - WireGuard:
+        icon: wireguard.png
+        href: http://wireguard.guardian.home
+        description: Fast, modern, secure VPN tunnel
+
+    - Nginx Proxy Manager:
+        icon: nginx-proxy-manager.png
+        href: http://npm.guardian.home
+        description: Expose web services easily and securely
+
+    - Cloudflared:
+        icon: cloudflare.png
+        href: https://dash.cloudflare.com
+        description: DNS over HTTPS for privacy and security
+
+- Config:
+    - Guardian Hub:
+        icon: mdi-shield-check
+        href: http://config.guardian.home
+        description: Configure services, change passwords, and manage settings
+
+- Dashboard:
+    - Homepage:
+        icon: homepage.png
+        href: http://homepage.guardian.home
+        description: Customizable application dashboard

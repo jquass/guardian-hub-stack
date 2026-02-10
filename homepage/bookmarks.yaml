@@ -1,0 +1,34 @@
+# For configuration options and examples, please see:
+# https://gethomepage.dev/configs/bookmarks
+
+- Guardian Hub:
+    - Config UI:
+        - icon: si-github
+          href: https://github.com/jquass/GuardianHub
+          description: Configuration UI (Kotlin/Jersey/React)
+    - Docker Stack:
+        - icon: si-github
+          href: https://github.com/jquass/guardian-hub-stack
+          description: Pi-hole, WireGuard, NPM compose stack
+
+- Stack Components:
+    - Pi-hole:
+        - icon: pi-hole
+          href: https://github.com/pi-hole/pi-hole
+          description: Network-wide ad blocking via your own Linux hardware
+    - WireGuard Easy:
+        - icon: wireguard
+          href: https://github.com/wg-easy/wg-easy
+          description: The easiest way to run WireGuard VPN
+    - Nginx Proxy Manager:
+        - icon: nginx-proxy-manager
+          href: https://github.com/NginxProxyManager/nginx-proxy-manager
+          description: Docker container for managing Nginx proxy hosts
+    - Cloudflared:
+        - icon: si-cloudflare
+          href: https://github.com/cloudflare/cloudflared
+          description: Cloudflare Tunnel (DNS over HTTPS)
+    - Homepage:
+        - icon: homepage
+          href: https://github.com/gethomepage/homepage
+          description: Customizable application dashboard

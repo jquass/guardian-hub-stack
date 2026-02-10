@@ -1,0 +1,18 @@
+---
+- resources:
+    label: System Resources
+    cpu: true
+    cputemp: true
+    tempmin: 20
+    tempmax: 60
+    memory: true
+    disk: /
+    uptime: true
+    network: true
+
+- datetime:
+    text_size: xl
+    format:
+      dateStyle: long
+      timeStyle: short
+      hour12: false

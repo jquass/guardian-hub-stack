@@ -1,0 +1,171 @@
+name: pi-stack
+
+services:
+  cloudflared:
+    image: crazymax/cloudflared:latest
+    container_name: cloudflared
+    command:
+      - proxy-dns
+    environment:
+      TUNNEL_DNS_ADDRESS: 0.0.0.0
+      TUNNEL_DNS_PORT: "5053"
+      TUNNEL_DNS_UPSTREAM: https://1.1.1.1/dns-query,https://1.0.0.1/dns-query
+      TZ: ${TZ}
+    networks:
+      pi_network:
+        ipv4_address: 172.20.0.2
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "-T", "2", "http://127.0.0.1:49312/metrics"]
+      timeout: 5s
+      interval: 10s
+      retries: 5
+      start_period: 10s
+
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    depends_on:
+      cloudflared:
+        condition: service_healthy
+    cap_add:
+      - NET_ADMIN
+    dns:
+      - 172.20.0.2
+      - 1.1.1.1
+    environment:
+      TZ: ${TZ}
+      WEBPASSWORD: ${PIHOLE_PASSWORD}
+      FTLCONF_dns_listeningMode: all
+      FTLCONF_dns_upstreams: 172.20.0.2#5053
+      PIHOLE_DNS_: 172.20.0.2#5053
+      DNSSEC: "true"
+      REV_SERVER: "true"
+      REV_SERVER_TARGET: ${ROUTER_IP}
+      REV_SERVER_CIDR: ${NETWORK_CIDR}
+      REV_SERVER_DOMAIN: ${NETWORK_DOMAIN}
+      VIRTUAL_HOST: pihole.${NETWORK_DOMAIN}
+    volumes:
+      - pihole_data:/etc/pihole
+      - pihole_dnsmasq:/etc/dnsmasq.d
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "8053:80/tcp"
+    networks:
+      pi_network:
+        ipv4_address: 172.20.0.3
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "dig", "+short", "@127.0.0.1", "pi.hole"]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 60s
+
+  wireguard:
+    image: ghcr.io/wg-easy/wg-easy:latest
+    container_name: wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      LANG: en
+      PASSWORD_HASH: ${WIREGUARD_PASSWORD_HASH}
+      PORT: "51821"
+      WG_HOST: ${GUARDIAN_IP}
+      WG_PORT: "51820"
+      WG_DEFAULT_ADDRESS: 10.8.0.x
+      WG_DEFAULT_DNS: 172.20.0.3
+      WG_MTU: "1420"
+      WG_PERSISTENT_KEEPALIVE: "25"
+      WG_ALLOWED_IPS: 0.0.0.0/0
+      TZ: ${TZ}
+    volumes:
+      - wireguard_data:/etc/wireguard
+    ports:
+      - "51820:51820/udp"
+      - "51821:51821/tcp"
+    networks:
+      pi_network:
+        ipv4_address: 172.20.0.4
+    restart: unless-stopped
+    sysctls:
+      net.ipv4.conf.all.src_valid_mark: "1"
+      net.ipv4.ip_forward: "1"
+
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+    environment:
+      DB_SQLITE_FILE: /data/database.sqlite
+      DISABLE_IPV6: "true"
+      TZ: ${TZ}
+    volumes:
+      - npm_data:/data
+      - npm_ssl:/etc/letsencrypt
+    ports:
+      - "80:80"
+      - "443:443"
+      - "81:81"
+    networks:
+      pi_network:
+        ipv4_address: 172.20.0.5
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:81"]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      HOMEPAGE_ALLOWED_HOSTS: "${GUARDIAN_IP}:3001,localhost:3001,homepage.guardian.home"
+      TZ: ${TZ}
+    volumes:
+      - ./homepage:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "3001:3000"
+    networks:
+      pi_network:
+        ipv4_address: 172.20.0.10
+    restart: unless-stopped
+
+  config-ui:
+    image: localhost/guardian-hub-config:latest
+    container_name: guardian-hub-config-ui
+    user: "0:0"
+    environment:
+      PORT: "8888"
+      TZ: ${TZ}
+    volumes:
+      - ./.env:/opt/pi-stack/.env
+      - ./.factory-password:/opt/pi-stack/.factory-password:ro
+      - ./.serial-number:/opt/pi-stack/.serial-number:ro
+      - ./docker-compose.yml:/opt/pi-stack/docker-compose.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "8888:8888"
+    networks:
+      pi_network:
+        ipv4_address: 172.20.0.11
+    restart: unless-stopped
+
+networks:
+  pi_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  pihole_data:
+  pihole_dnsmasq:
+  wireguard_data:
+  npm_data:
+  npm_ssl:

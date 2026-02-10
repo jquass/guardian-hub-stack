@@ -1,0 +1,14 @@
+---
+title: Guardian Hub
+favicon: https://cdn-icons-png.flaticon.com/512/2913/2913133.png
+background: https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920
+cardBlur: md
+theme: dark
+color: slate
+headerStyle: boxed
+hideVersion: true
+
+layout:
+  Services:
+    style: row
+    columns: 3

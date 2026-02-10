@@ -1,0 +1,28 @@
+# Environment files (contain secrets)
+.env
+.env.backup.*
+*.swp
+
+# Logs
+homepage/logs
+*.log
+
+# Docker volumes and data
+*/data/
+*/config/
+*/letsencrypt/
+
+# Backups
+*.backup
+backup/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Labels
+labels/
+
+
+.factory-password
+.serial-number
