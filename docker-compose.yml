@@ -137,7 +137,7 @@ services:
     restart: unless-stopped
 
   config-ui:
-    image: localhost/guardian-hub-config:latest
+    image: ghcr.io/jquass/guardianhub:latest
     container_name: guardian-hub-config-ui
     user: "0:0"
     environment:
